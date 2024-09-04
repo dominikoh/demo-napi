@@ -1,43 +1,54 @@
 // addon.cc
 #include <node.h>
-#include <assert.h>
-#include <stdlib.h>
 
-using node::AddEnvironmentCleanupHook;
-using v8::HandleScope;
+namespace demo {
+
+using v8::Exception;
+using v8::FunctionCallbackInfo;
 using v8::Isolate;
 using v8::Local;
+using v8::Number;
 using v8::Object;
+using v8::String;
+using v8::Value;
 
-// Note: In a real-world application, do not rely on static/global data.
-static char cookie[] = "yum yum";
-static int cleanup_cb1_called = 0;
-static int cleanup_cb2_called = 0;
+// This is the implementation of the "add" method
+// Input arguments are passed using the
+// const FunctionCallbackInfo<Value>& args struct
+void Add(const FunctionCallbackInfo<Value>& args) {
+  Isolate* isolate = args.GetIsolate();
 
-static void cleanup_cb1(void* arg) {
-  Isolate* isolate = static_cast<Isolate*>(arg);
-  HandleScope scope(isolate);
-  Local<Object> obj = Object::New(isolate);
-  assert(!obj.IsEmpty());  // assert VM is still alive
-  assert(obj->IsObject());
-  cleanup_cb1_called++;
+  // Check the number of arguments passed.
+  if (args.Length() < 2) {
+    // Throw an Error that is passed back to JavaScript
+    isolate->ThrowException(Exception::TypeError(
+        String::NewFromUtf8(isolate,
+                            "Wrong number of arguments").ToLocalChecked()));
+    return;
+  }
+
+  // Check the argument types
+  if (!args[0]->IsNumber() || !args[1]->IsNumber()) {
+    isolate->ThrowException(Exception::TypeError(
+        String::NewFromUtf8(isolate,
+                            "Wrong arguments").ToLocalChecked()));
+    return;
+  }
+
+  // Perform the operation
+  double value =
+      args[0].As<Number>()->Value() + args[1].As<Number>()->Value();
+  Local<Number> num = Number::New(isolate, value);
+
+  // Set the return value (using the passed in
+  // FunctionCallbackInfo<Value>&)
+  args.GetReturnValue().Set(num);
 }
 
-static void cleanup_cb2(void* arg) {
-  assert(arg == static_cast<void*>(cookie));
-  cleanup_cb2_called++;
+void Init(Local<Object> exports) {
+  NODE_SET_METHOD(exports, "add", Add);
 }
 
-static void sanity_check(void*) {
-  assert(cleanup_cb1_called == 1);
-  assert(cleanup_cb2_called == 1);
-}
+NODE_MODULE(NODE_GYP_MODULE_NAME, Init)
 
-// Initialize this addon to be context-aware.
-NODE_MODULE_INIT(/* exports, module, context */) {
-  Isolate* isolate = context->GetIsolate();
-
-  AddEnvironmentCleanupHook(isolate, sanity_check, nullptr);
-  AddEnvironmentCleanupHook(isolate, cleanup_cb2, cookie);
-  AddEnvironmentCleanupHook(isolate, cleanup_cb1, isolate);
-}
+}  // namespace demo
