@@ -1,0 +1,15 @@
+{
+  "name": "demo-usage",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "demo-napi": "^1.0.5"
+  }
+}

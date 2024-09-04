@@ -1,12 +1,12 @@
 {
   "name": "demo-napi",
-  "version": "1.0.1",
+  "version": "1.0.5",
   "description": "",
   "main": "main.js",
+  "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "install": "node-gyp rebuild",
-    "dev": "node main.js"
+    "install": "node-gyp rebuild"
   },
   "author": "",
   "license": "ISC",
