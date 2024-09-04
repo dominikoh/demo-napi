@@ -9,6 +9,10 @@
 @build:
   node-gyp configure build
 
+[confirm("Really remove build directory?")]
+@clean:
+  rm -rf build
+
 @os-info:  
   echo "Arch: {{arch()}}"
   echo "OS: {{os()}}"
