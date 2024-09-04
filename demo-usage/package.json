@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "demo-napi": "^1.0.5"
+    "demo-napi": "../"
   }
 }
